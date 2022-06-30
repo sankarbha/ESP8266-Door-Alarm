@@ -8,7 +8,6 @@
   The above copyright notice and this permission notice shall be included in all
   copies or substantial portions of the Software.
 */
-
 #include <ESP8266WiFi.h>
 #include <espnow.h>
 
@@ -24,24 +23,14 @@ typedef struct struct_message {
 // Create a struct_message called myData
 struct_message myData;
 
+//set your wifi network's channel. This is to facilitate the receiving agents to connect to internet
+//I have tried using the method available here [https://github.com/m1cr0lab-esp32/esp-now-network-and-wifi-gateway/blob/47f324a9302d8111b85ceb99601f4458825f5bb1/src/sender.cpp#L18], 
+//but doesn't seem to work for my home's hidden wifi network
+unsigned int WIFI_CHANNEL = 5;
+
 const int pirPin = 13;
 int pirState = 0;
 int lastPirState = 0;
-
-unsigned long BlinkTimer = 0;
-unsigned long SendDataTimer = 0;
-
-//nbt nonblockingtimer 
-boolean TimePeriodIsOver (unsigned long &expireTime, unsigned long TimePeriod) {
-  unsigned long currentMillis  = millis();
-  if ( currentMillis - expireTime >= TimePeriod )
-  {
-    expireTime = currentMillis; // set new expireTime
-    return true;                // more time than TimePeriod) has elapsed since last time if-condition was true
-  } 
-  else return false;            // not expired
-}
-
 
 // Callback when data is sent
 void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
@@ -75,7 +64,7 @@ void setup() {
   esp_now_register_send_cb(OnDataSent);
   
   // Register peer
-  esp_now_add_peer(broadcastAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
+  esp_now_add_peer(broadcastAddress, ESP_NOW_ROLE_SLAVE, WIFI_CHANNEL, NULL, 0);
 }
  
 void loop() {
