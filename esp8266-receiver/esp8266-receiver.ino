@@ -21,21 +21,9 @@ typedef struct struct_message {
 // Create a struct_message called myData
 struct_message myData;
 
-const int buzzerPin = 14;
-unsigned long BlinkTimer = 0;
+const unsigned int buzzerPin = 14;
 bool isDetected = false;
-//unsigned long blinkCounter = 0;
-
-//nbt nonblockingtimer 
-boolean TimePeriodIsOver (unsigned long &expireTime, unsigned long TimePeriod) {
-  unsigned long currentMillis  = millis();
-  if ( currentMillis - expireTime >= TimePeriod )
-  {
-    expireTime = currentMillis; // set new expireTime
-    return true;                // more time than TimePeriod) has elapsed since last time if-condition was true
-  } 
-  else return false;            // not expired
-}
+const unsigned int beepCount = 5;
 
 // Callback function that will be executed when data is received
 void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
@@ -66,26 +54,28 @@ void setup() {
   }
   
   // Once ESPNow is successfully Init, we will register for recv CB to
-  // get recv packer info
+  // get recv packet info
   esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
   esp_now_register_recv_cb(OnDataRecv);
 }
 
+void blinkBeep() {
+  //https://www.arduino.cc/reference/en/language/functions/advanced-io/tone/
+  tone(buzzerPin, 1000, 50);
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(500);
+  
+  noTone(buzzerPin);
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(500);
+}
+
 void loop() {
   if (isDetected) {
-    if ( TimePeriodIsOver(BlinkTimer,500) ) {
-      if (digitalRead(BUILTIN_LED) == HIGH){
-        digitalWrite (BUILTIN_LED, LOW );
-        tone(buzzerPin, 1000, 100);//https://www.arduino.cc/reference/en/language/functions/advanced-io/tone/
-      }
-      else {
-        digitalWrite (BUILTIN_LED, HIGH );
-        noTone(buzzerPin);
-      }      
+    for (int i = 0; i < beepCount; i++) {
+      blinkBeep();
     }
+
+    isDetected = false;
   }
-  else {
-    digitalWrite (BUILTIN_LED, HIGH );
-    noTone(buzzerPin);
-  }  
 }

@@ -67,7 +67,7 @@ void ConnectToWiFiNetwork() {
 
 void setup() {
   Serial.begin(9600);
-
+  //both AP and Station mode
   WiFi.mode(WIFI_AP_STA);
   WiFi.disconnect();
   delay(1000);
